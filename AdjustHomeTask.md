@@ -53,12 +53,14 @@ order by revenue desc;
 4) Show CPI and spend for Canada (CA) broken down by channel ordered by CPI in descending order. Please think carefully which is an appropriate aggregate function for CPI.
 
 ```angular2html
-select channel, sum(spend / installs) as CPI
+select channel, cast(sum(spend) / sum(installs) as DECIMAL(10,4)) as CPI
 from data
 where country = 'CA'
 group by channel
 order by CPI desc;
 ```
+
+Bad version `sum(spend / installs) as CPI`
 
 API endpoint is supposed to serve a dynamic dataset that corresponds to any combination of filters, breakdowns and sorting. Four use-cases are provided to give the general idea of its usage and capabilities. Please don't expect use-case number as an API parameter.
 

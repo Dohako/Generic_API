@@ -2,15 +2,14 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from os.path import abspath
 from base_handler import BaseHandler
 
-
 CSV_DIR_PATH = abspath(".\\tmp\\separated csv\\")
-TEST_HTTP = "http://127.0.0.1:5000/show?channel,country,sum-impressions_as_impressions,sum-clicks_as_clicks&date:2017-06-01&group:channel,country&order:clicks"
+TEST_HTTP = "http://127.0.0.1:5000/show?channel,country,sum-impressions_as_impressions,sum-clicks_as_clicks&where:date_2017-06-01&group:channel,country&order:clicks"
 
 DATABASE_NAME = 'adjust'
 TABLE_NAME = 'data'
 COLUMNS_OF_TABLE = ['all', 'id', 'date', 'channel', 'country', 'os',
                     'impressions', 'clicks', 'installs', 'spend', 'revenue']
-SQL_COMMANDS = ['select','from','where','group', 'order', 'sum', 'as']
+SQL_COMMANDS = ['select', 'from', 'where', 'group', 'order', 'sum', 'as']
 
 
 class ServiceHandler(BaseHTTPRequestHandler):
@@ -38,11 +37,12 @@ class ServiceHandler(BaseHTTPRequestHandler):
             result = "Please, choose some parameters"
         else:
             args = line_to_parse.split('?')[1].split('&')
-            # args = 'select * from data;'
+
             # for arg in args:
             #     sql = arg
-            sql = ''
-            sql += args[0]
+            sql = self.convert_args_to_sql(args)
+
+            args = 'select * from data;'
             df = self.convert_to_df(args)
 
             result = df.to_html()
@@ -56,6 +56,41 @@ class ServiceHandler(BaseHTTPRequestHandler):
             # if isinstance(sku, type(None)):
             #     result = "Sorry, but sku is obligatory, rank is optional"
         return result
+
+    def convert_args_to_sql(self, args) -> str:
+        sql = ''
+        print(args)
+        select_block = args[0]
+        from_block = 'from data'
+        where_block = ''
+        group_block = ''
+        order_block = ''
+        other_args = args[1:]
+        for arg in other_args:
+            if "where" in arg:
+                where_block = arg
+            elif "group" in arg:
+                group_block = arg
+            elif "order" in arg:
+                order_block = arg
+        select_part = []
+        for item in select_block.split(','):
+            if 'sum' in item:
+                if 'as' in item:
+                    check = item.split('-')[1].split('_')[0]
+                    if check in COLUMNS_OF_TABLE:
+                        new_name = item.split('-')[1].split('_')[-1]
+                        if new_name > check and new_name > 15:
+                            new_name = check
+                        part = f'sum ({check}) as {new_name}'
+                        select_part.append(part)
+
+        print(f"select {select_block}")
+        print(f"from {from_block}")
+        print(f"where {where_block}")
+        print(f"group {group_block}")
+        print(f"order {order_block}")
+        return sql
 
     def convert_to_sql(self, line):
         respond_from_db = base.get_data(line)
@@ -77,5 +112,11 @@ def main():
     server.serve_forever()
 
 
+def test():
+    args = ['channel,country,sum-impressions_as_impressions,sum-clicks_as_clicks', 'where:date_2017-06-01', 'group:channel,country', 'order:clicks']
+    sql = ServiceHandler.convert_args_to_sql(None,args)
+    print(sql)
+
+
 if __name__ == '__main__':
-    main()
+    test()
