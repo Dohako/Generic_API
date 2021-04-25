@@ -82,12 +82,23 @@ class ServiceHandler(BaseHTTPRequestHandler):
                         new_name = item.split('-')[1].split('_')[-1]
                         if new_name > check and new_name > 15:
                             new_name = check
-                        part = f'sum ({check}) as {new_name}'
+                        part = f'sum({check}) as {new_name}'
                         select_part.append(part)
+            else:
+                if item in COLUMNS_OF_TABLE:
+                    part = f'{item}'
+                    select_part.append(part)
+        select_block = ''
+        for part in select_part:
+            select_block += f'{part}, '
+        select_block = select_block[:-2]
+
+        if where_block:
+            NotImplemented
 
         print(f"select {select_block}")
-        print(f"from {from_block}")
-        print(f"where {where_block}")
+        print(f"{from_block}")
+        print(f"{where_block}")
         print(f"group {group_block}")
         print(f"order {order_block}")
         return sql
