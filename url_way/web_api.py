@@ -1,15 +1,14 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from os.path import abspath
 from base_handler import BaseHandler
 
-CSV_DIR_PATH = abspath(".\\tmp\\separated csv\\")
-TEST_HTTP = "http://127.0.0.1:5000/show?channel,country,sum-impressions_as_impressions,sum-clicks_as_clicks&where:date_2017-06-01&group:channel,country&order:clicks"
+TEST_HTTP = "http://127.0.0.1:5000/show?channel,country,sum-impressions_as_impressions,sum-clicks_as_clicks&where:date_range_2017-06-01_2017-06-02&group:channel,country&order:clicks-desc"
 
 DATABASE_NAME = 'adjust'
 TABLE_NAME = 'data'
-COLUMNS_OF_TABLE = ['all', 'id', 'date', 'channel', 'country', 'os',
-                    'impressions', 'clicks', 'installs', 'spend', 'revenue']
-SQL_COMMANDS = ['select', 'from', 'where', 'group', 'order', 'sum', 'as']
+COLUMNS_OF_TABLE = ('all', 'id', 'date', 'channel', 'country', 'os',
+                    'impressions', 'clicks', 'installs', 'spend', 'revenue')
+SQL_COMMANDS = ('select', 'from', 'where', 'group', 'order', 'sum', 'as')
+SQL_UNIONS = ("and", "or")
 
 
 class ServiceHandler(BaseHTTPRequestHandler):
@@ -64,15 +63,21 @@ class ServiceHandler(BaseHTTPRequestHandler):
         from_block = 'from data'
         where_block = ''
         group_block = ''
+        sort_block = ''
         order_block = ''
         other_args = args[1:]
+
         for arg in other_args:
             if "where" in arg:
                 where_block = arg
             elif "group" in arg:
                 group_block = arg
+            elif "sort" in arg:
+                sort_block = arg
             elif "order" in arg:
                 order_block = arg
+
+        # SELECT part
         select_part = []
         for item in select_block.split(','):
             if 'sum' in item:
@@ -84,6 +89,8 @@ class ServiceHandler(BaseHTTPRequestHandler):
                             new_name = check
                         part = f'sum({check}) as {new_name}'
                         select_part.append(part)
+            if 'cast' in item:
+                NotImplemented
             else:
                 if item in COLUMNS_OF_TABLE:
                     part = f'{item}'
@@ -93,13 +100,28 @@ class ServiceHandler(BaseHTTPRequestHandler):
             select_block += f'{part}, '
         select_block = select_block[:-2]
 
+        # WHERE PART
+
         if where_block:
+            block_part = where_block.split(':')[1]
+            if 'and' in block_part or 'or' in block_part:
+                ...
+            column_name = block_part.split('_')[0]
+
+        if group_block:
+            NotImplemented
+        
+        if sort_block:
+            NotImplemented
+
+        if order_block:
             NotImplemented
 
         print(f"select {select_block}")
         print(f"{from_block}")
         print(f"{where_block}")
         print(f"group {group_block}")
+        print(f"sort {sort_block}")
         print(f"order {order_block}")
         return sql
 
@@ -124,10 +146,11 @@ def main():
 
 
 def test():
-    args = ['channel,country,sum-impressions_as_impressions,sum-clicks_as_clicks', 'where:date_2017-06-01', 'group:channel,country', 'order:clicks']
+    args = ['channel,country,sum-impressions_as_impressions,sum-clicks_as_clicks', 'where:date_>_2017-06-01', 'group:channel,country', 'sort:clicks','order:desc']
     sql = ServiceHandler.convert_args_to_sql(None,args)
     print(sql)
 
 
 if __name__ == '__main__':
-    test()
+    # test()
+    main()

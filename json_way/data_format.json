@@ -1,0 +1,22 @@
+[
+    {
+        "select": [
+            "channel",
+            "country",
+            "SUM impressions as impressions",
+            "SUM clicks as clicks",
+            "cast(sum(spend) / sum(installs) as DECIMAL(10,4)) as CPI"
+        ],
+        "where": [
+            "date > 2017-06-01"
+        ],
+        "group by": [
+            "channel",
+            "country"
+        ],
+        "sort by": [
+            "clicks"
+        ],
+        "order by": "desc"
+    }
+]
