@@ -88,7 +88,6 @@ class ServiceHandler(BaseHTTPRequestHandler):
         return
 
     def args_handler(self, line_to_parse: str):
-        print(line_to_parse)
         if line_to_parse == '':
             result = f"Hello, we have some information, check it out.\n(example {TEST_HTTP})"
         elif 'expose_data' not in line_to_parse:
@@ -100,7 +99,7 @@ class ServiceHandler(BaseHTTPRequestHandler):
         else:
             args = line_to_parse.split('expose_data?')[-1].split('&')
             sql = self.convert_args_to_sql(args)
-            df = self.convert_to_df(sql)
+            df = self.get_df_from_db(sql)
             result = df.to_html()
         return result
 
@@ -149,11 +148,11 @@ class ServiceHandler(BaseHTTPRequestHandler):
         sql = f'{sql_select}\n{from_block}\n{sql_where}\n{sql_group}\n{sql_order}'
         return sql
 
-    def convert_to_sql(self, line):
+    def get_raw_data_from_db(self, line):
         respond_from_db = base.get_data(line)
         return respond_from_db
 
-    def convert_to_df(self, line):
+    def get_df_from_db(self, line):
         df_from_db = base.get_df_from_data(line)
         return df_from_db
 
@@ -170,7 +169,7 @@ def test():
     args = FOURTH_TEST.split('expose_data?')[-1].split('&')
     sql = ServiceHandler.convert_args_to_sql(None,args)
     print(sql)
-    print(ServiceHandler.convert_to_df(None,sql))
+    print(ServiceHandler.get_df_from_db(None,sql))
 
 
 if __name__ == '__main__':
