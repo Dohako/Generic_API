@@ -6,7 +6,7 @@ This part is TBD for the moment.
 
 ## Stack
 
-* flask
+* fastapi
 
 * GraphQL
 
