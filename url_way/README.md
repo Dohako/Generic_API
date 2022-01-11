@@ -4,7 +4,39 @@ Simpliest and CHARGE way is to parse direct url request for arguments and then m
 
 Currently this way is blocked, but it will be completed.
 
-## First query
+## Stack
+
+* simple http from python
+
+* psycopg2 for psql
+
+## Opinion
+
+### PROS
+
+* this way we can create connections for frontend and send data in various ways like df or simple lists
+
+* easy to test because here you need to just goto links
+
+* answer comes to browsers page direct and it visually nicer for testing
+
+### CONS
+
+* because of url formating restrictions it is hard to create an understandable link format
+
+* data fields is transfered through url and everyone can see all about database
+
+I find this way worst of three, because it is fully exposed to user
+
+## Test order
+
+* run script (`python path_to_folder\url_way\main.py`)
+
+* go to example links from [Query Example part](#query-examples)
+
+## Query examples
+
+### First query
 
 Show the number of impressions and clicks that occurred before the 1st of June 2017, broken down by channel and country, sorted by clicks in descending order. Hint:
 
@@ -18,7 +50,7 @@ order by clicks desc;
 
 goes for [first query](http://127.0.0.1:5000/expose_data?show:channel,country,sum_impressions_as_impressions,sum_clicks&filter:date_<_*2017-06-01*&group:channel,country&order:clicks-desc)
 
-## Second query
+### Second query
 
 Show the number of installs that occurred in May of 2017 on iOS, broken down by date, sorted by date in ascending order.
 
@@ -32,7 +64,7 @@ order by date desc;
 
 goes for [second query](http://127.0.0.1:5000/expose_data?show:date,sum_installs&filter:date_>_*2017-05-30*_and_os_=_*ios*&group:date&order:date-desc)
 
-## Third query
+### Third query
 
 Show revenue, earned on June 1, 2017 in US, broken down by operating system and sorted by revenue in descending order.
 
@@ -46,7 +78,7 @@ order by revenue desc;
 
 goes for [third query](http://127.0.0.1:5000/expose_data?show:os,sum_revenue&filter:date_=_*2017-06-01*_and_country_=_*US*&group:os&order:revenue-desc)
 
-## Fourth query
+### Fourth query
 
 Show CPI and spend for Canada (CA) broken down by channel ordered by CPI in descending order. Please think carefully which is an appropriate aggregate function for CPI.
 

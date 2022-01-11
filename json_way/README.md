@@ -6,7 +6,32 @@ In that way fast API is used for creating endpoit.
 
 Json format example is also here.
 
-## Test order:
+## Stack
+
+* fastapi
+
+* uvicorn
+
+* json
+
+* psycopg2 for psql
+
+## Opinion
+
+### PROS
+
+* this way we can create stable connection inside of projects for different clients
+
+* more control of incoming data and easy to understand data structure
+
+### CONS
+
+* sending json in post is not so easy to repeat for quick testing
+
+I find this way best of three. It's not only possible to connect any front/back to that solution,
+but also, as I think, this is the way it usualy created generic API's
+
+## Test order
 
 * activate venv
 
@@ -30,7 +55,9 @@ OR
 
 ]
 
-## First query
+## Query examples
+
+### First query
 
 Show the number of impressions and clicks that occurred before the 1st of June 2017, broken down by channel and country, sorted by clicks in descending order. Hint:
 
@@ -64,7 +91,7 @@ order by clicks desc;
 }
 ```
 
-## Second query
+### Second query
 
 Show the number of installs that occurred in May of 2017 on iOS, broken down by date, sorted by date in ascending order.
 
@@ -96,7 +123,7 @@ order by date desc;
 }
 ```
 
-## Third query
+### Third query
 
 Show revenue, earned on June 1, 2017 in US, broken down by operating system and sorted by revenue in descending order.
 
@@ -128,7 +155,7 @@ order by revenue desc;
 }
 ```
 
-## Fourth query
+### Fourth query
 
 Show CPI and spend for Canada (CA) broken down by channel ordered by CPI in descending order. Please think carefully which is an appropriate aggregate function for CPI.
 
