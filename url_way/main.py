@@ -3,15 +3,32 @@ from base_handler import BaseHandler
 
 TEST_HTTP = ''.join("""http://127.0.0.1:5000/expose_data?
                 show:channel,country,sum_impressions_as_impressions,sum_clicks,
-                cast_cpi=sum_spend//sum_installs
-                &filter:date_>_"2017-06-01"_and_date_<_"2017-06-02"_or_country_=_"US"
+                cast_cpi=sum_spend^sum_installs
+                &filter:date_>_*2017-06-01*_and_date_<_*2017-06-02*_or_country_=_*US*
                 &group:channel,country
                 &order:clicks-desc""".split())
+FIRST_TEST = ''.join("""http://127.0.0.1:5000/expose_data?show:channel,country,sum_impressions_as_impressions,sum_clicks
+                    &filter:date_<_*2017-06-01*
+                    &group:channel,country
+                    &order:clicks-desc""".split())
+SECOND_TEST = ''.join("""http://127.0.0.1:5000/expose_data?show:date,sum_installs
+                    &filter:date_>_*2017-05-30*_and_os_=_*ios*
+                    &group:date
+                    &order:date-desc""".split())
+THIRD_TEST = ''.join("""http://127.0.0.1:5000/expose_data?show:os,sum_revenue
+                    &filter:date_=_*2017-06-01*_and_country_=_*US*
+                    &group:os
+                    &order:revenue-desc""".split())
+FOURTH_TEST = ''.join("""http://127.0.0.1:5000/expose_data?show:channel,cast_cpi=sum_spend//sum_installs
+                    &filter:country_=_*US*
+                    &group:channel
+                    &order:cpi-desc""".split())
 DATABASE_NAME = 'adjust'
 COLUMNS_OF_TABLE = ('all', 'id', 'date', 'channel', 'country', 'os',
                     'impressions', 'clicks', 'installs', 'spend', 'revenue')
-OPERATORS = ('+', '-', '*', '//')
+OPERATORS = ('+', '-', '*', '^')
 
+base = BaseHandler(DATABASE_NAME)
 
 def parse_sum_in_select(select_part:str, as_part = True) -> str:
     column_name = select_part.split()[1]
@@ -71,7 +88,6 @@ class ServiceHandler(BaseHTTPRequestHandler):
         return
 
     def args_handler(self, line_to_parse: str):
-        # result = ''
         print(line_to_parse)
         if line_to_parse == '':
             result = f"Hello, we have some information, check it out.\n(example {TEST_HTTP})"
@@ -84,16 +100,11 @@ class ServiceHandler(BaseHTTPRequestHandler):
         else:
             args = line_to_parse.split('expose_data?')[-1].split('&')
             sql = self.convert_args_to_sql(args)
-
-            args = 'select * from data;'
-            df = self.convert_to_df(args)
-
+            df = self.convert_to_df(sql)
             result = df.to_html()
         return result
 
     def convert_args_to_sql(self, args) -> str:
-        sql = ''
-        print(args)
         from_block = 'from data'
 
         for arg in args:
@@ -107,10 +118,11 @@ class ServiceHandler(BaseHTTPRequestHandler):
                 order_block = arg.split('order:')[1].split('-')
 
         if select_block:
-            print(select_block)
             sql_select_part = []
             for item in select_block.split(','):
                 sql_part = parse_arg_to_select_query(item)
+                if '^' in sql_part:
+                    sql_part = sql_part.replace('^', '/')
                 sql_select_part.append(sql_part)
 
             select_block = ', '.join(sql_select_part)
@@ -119,7 +131,7 @@ class ServiceHandler(BaseHTTPRequestHandler):
             sql_select = 'select *'
 
         if where_block:
-            sql_where = 'where ' + where_block.replace('"', "'")
+            sql_where = 'where ' + where_block.replace('*', "'")
         else:
             sql_where = ''
 
@@ -150,20 +162,17 @@ class ServiceHandler(BaseHTTPRequestHandler):
 
 
 def main():
-    global base
-    base = BaseHandler(DATABASE_NAME)
-
     server = HTTPServer(('127.0.0.1', 5000), ServiceHandler)
     server.serve_forever()
 
 
 def test():
-    args = TEST_HTTP.split('expose_data?')[-1].split('&')
-    # args = ['channel,country,sum-impressions_as_impressions,sum-clicks_as_clicks', 'where:date_>_2017-06-01', 'group:channel,country', 'sort:clicks','order:desc']
+    args = FOURTH_TEST.split('expose_data?')[-1].split('&')
     sql = ServiceHandler.convert_args_to_sql(None,args)
     print(sql)
+    print(ServiceHandler.convert_to_df(None,sql))
 
 
 if __name__ == '__main__':
-    test()
-    # main()
+    # test()
+    main()

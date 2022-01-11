@@ -22,7 +22,7 @@ class BaseHandler:
         conn = connect(database=self.db, user=self.user,
                        password=self.password, host=self.host, port=self.port)
         conn.autocommit = True
-        result = read_sql(command, conn, index_col='id')
+        result = read_sql(command, conn)
         conn.close()
         return result
 
