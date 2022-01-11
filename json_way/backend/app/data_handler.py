@@ -63,16 +63,14 @@ def parse_json_to_sql(json: dict) -> str:
                         break
                 else:
                     raise ValueError("Operator for CAST operation is incorrect")
-                result_cast_sql = f'CAST({cast_first_operand_sql} {operator} {cast_second_operand_sql} as DECIMAL(10,4)) as {cast_name}'
-                sql_select_part.append(result_cast_sql)
+                sql_part = f'CAST({cast_first_operand_sql} {operator} {cast_second_operand_sql} as DECIMAL(10,4)) as {cast_name}'
             elif 'SUM' in item:
                 sql_part = parse_sum_in_select(item)
-                sql_select_part.append(sql_part)
             else:
                 if item not in COLUMNS_OF_TABLE:
                     raise KeyError(f"ERROR: {item} not in table")
                 sql_part = f'{item}'
-                sql_select_part.append(sql_part)
+            sql_select_part.append(sql_part)
 
         select_block = ', '.join(sql_select_part)
         sql_select = f'select {select_block}'

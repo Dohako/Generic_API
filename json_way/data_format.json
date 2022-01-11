@@ -1,22 +1,90 @@
-[
-    {
+{
+    "1": {
         "select": [
             "channel",
             "country",
-            "SUM impressions as impressions",
-            "SUM clicks as clicks",
-            "cast(sum(spend) / sum(installs) as DECIMAL(10,4)) as CPI"
+            "SUM impressions as my_impressions",
+            "SUM clicks",
+            "CAST CPI = SUM spend / SUM installs"
         ],
-        "where": [
-            "date > 2017-06-01"
+        "filter": [
+            "date > '2017-06-01'",
+            "and date < '2017-06-02'",
+            "or country = 'US'"
         ],
         "group by": [
             "channel",
             "country"
         ],
-        "sort by": [
-            "clicks"
+        "order by": [
+            "clicks",
+            "desc"
+        ]
+    },
+    "2": {
+        "select": [
+            "channel",
+            "country",
+            "SUM impressions as my_impressions",
+            "SUM clicks",
+            "CAST CPI = SUM spend / SUM installs"
         ],
-        "order by": "desc"
+        "filter": [
+            "date > '2017-06-01'",
+            "and date < '2017-06-02'",
+            "or country = 'US'"
+        ],
+        "group by": [
+            "channel",
+            "country"
+        ],
+        "order by": [
+            "clicks",
+            "desc"
+        ]
+    },
+    "3":{
+        "select": [
+            "channel",
+            "country",
+            "SUM impressions as my_impressions",
+            "SUM clicks",
+            "CAST CPI = SUM spend / SUM installs"
+        ],
+        "filter": [
+            "date > '2017-06-01'",
+            "and date < '2017-06-02'",
+            "or country = 'US'"
+        ],
+        "group by": [
+            "channel",
+            "country"
+        ],
+        "order by": [
+            "clicks",
+            "desc"
+        ]
+    },
+    "4":{
+        "select": [
+            "channel",
+            "country",
+            "SUM impressions as my_impressions",
+            "SUM clicks",
+            "CAST CPI = SUM spend / SUM installs"
+        ],
+        "filter": [
+            "date > '2017-06-01'",
+            "and date < '2017-06-02'",
+            "or country = 'US'"
+        ],
+        "group by": [
+            "channel",
+            "country"
+        ],
+        "order by": [
+            "clicks",
+            "desc"
+        ]
     }
-]
+}
