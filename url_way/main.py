@@ -8,11 +8,8 @@ TEST_HTTP = ''.join("""http://127.0.0.1:5000/expose_data?
                 &group:channel,country
                 &order:clicks-desc""".split())
 DATABASE_NAME = 'adjust'
-TABLE_NAME = 'data'
 COLUMNS_OF_TABLE = ('all', 'id', 'date', 'channel', 'country', 'os',
                     'impressions', 'clicks', 'installs', 'spend', 'revenue')
-SQL_COMMANDS = ('select', 'from', 'where', 'group', 'order', 'sum', 'as')
-SQL_UNIONS = ("and", "or")
 OPERATORS = ('+', '-', '*', '//')
 
 

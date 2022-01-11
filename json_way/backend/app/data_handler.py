@@ -12,6 +12,32 @@ def handle_data(request: dict):
     result = get_data_from_db(sql)
     return result
 
+def parse_arg_to_select_query(select_part:str) -> str:
+    select_part = select_part.lower()
+    if 'cast' in select_part:
+        cast_name = select_part.split("cast")[1].strip().split('=')[0].strip()
+        cast_body = select_part.split('=')[1].strip()
+        
+        for operator in OPERATORS:
+            if operator in cast_body:
+                cast_first_operand = cast_body.split(operator)[0].strip()
+                cast_second_operand = cast_body.split(operator)[1].strip()
+                if 'sum' in cast_first_operand or 'sum' in cast_second_operand:
+                    cast_first_operand_sql = parse_sum_in_select(cast_first_operand, as_part=False)
+                    cast_second_operand_sql = parse_sum_in_select(cast_second_operand, as_part=False)
+                break
+        else:
+            raise ValueError("Operator for CAST operation is incorrect")
+        sql_part = f'CAST({cast_first_operand_sql} {operator} {cast_second_operand_sql} as DECIMAL(10,4)) as {cast_name}'
+    elif 'sum' in select_part:
+        sql_part = parse_sum_in_select(select_part)
+    else:
+        if select_part not in COLUMNS_OF_TABLE:
+            raise KeyError(f"ERROR: {select_part} not in table")
+        sql_part = f'{select_part}'
+
+    return sql_part
+
 def parse_sum_in_select(select_part:str, as_part = True) -> str:
     column_name = select_part.split()[1]
     if column_name not in COLUMNS_OF_TABLE:
@@ -28,8 +54,18 @@ def parse_sum_in_select(select_part:str, as_part = True) -> str:
         sql_part = f'SUM({column_name}) as {column_name}'
     return sql_part
 
+def check_forbidden_symbol(input:list) -> None:
+    """
+    a dumb way of checking injections
+    Raises ValueError on forbidden symbol
+    """
+    for item in input:
+        if ';' in item:
+            raise ValueError("ERROR: symbol ';' in request")
+
 def parse_json_to_sql(json: dict) -> str:
     """
+    simple way of HARD parsing json to sql query.
     ON ERROR calls KeyError and ValueError
     """
     from_block = "from data"
@@ -49,27 +85,7 @@ def parse_json_to_sql(json: dict) -> str:
         for item in select_block:
             if ';' in item:
                 raise ValueError("ERROR: symbol ';' in request")
-            if 'CAST' in item:
-                cast_name = item.split("CAST")[1].strip().split('=')[0].strip()
-                cast_body = item.split('=')[1].strip()
-                
-                for operator in OPERATORS:
-                    if operator in cast_body:
-                        cast_first_operand = cast_body.split(operator)[0].strip()
-                        cast_second_operand = cast_body.split(operator)[1].strip()
-                        if 'SUM' in cast_first_operand or 'SUM' in cast_second_operand:
-                            cast_first_operand_sql = parse_sum_in_select(cast_first_operand, as_part=False)
-                            cast_second_operand_sql = parse_sum_in_select(cast_second_operand, as_part=False)
-                        break
-                else:
-                    raise ValueError("Operator for CAST operation is incorrect")
-                sql_part = f'CAST({cast_first_operand_sql} {operator} {cast_second_operand_sql} as DECIMAL(10,4)) as {cast_name}'
-            elif 'SUM' in item:
-                sql_part = parse_sum_in_select(item)
-            else:
-                if item not in COLUMNS_OF_TABLE:
-                    raise KeyError(f"ERROR: {item} not in table")
-                sql_part = f'{item}'
+            sql_part = parse_arg_to_select_query(item)
             sql_select_part.append(sql_part)
 
         select_block = ', '.join(sql_select_part)
@@ -78,14 +94,17 @@ def parse_json_to_sql(json: dict) -> str:
         sql_select = 'select *'
 
     if where_block:
+        check_forbidden_symbol(where_block)
         sql_where = 'where ' + ' '.join(where_block)
     else:
         sql_where = ''
 
     if group_block:
+        check_forbidden_symbol(group_block)
         sql_group = 'group by ' + ', '.join(group_block)
 
     if order_block:
+        check_forbidden_symbol(order_block)
         if order_block[-1] == 'desc' or order_block[-1] == 'asc':
             order = order_block[-1]
             order_block = order_block[:-1]
@@ -133,4 +152,4 @@ if __name__ == "__main__":
     sql = parse_json_to_sql(json)
     print(sql)
     print(get_data_from_db(sql))
-    print(type(get_df_from_db(sql)))
+    print(get_df_from_db(sql))
