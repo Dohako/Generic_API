@@ -1,3 +1,4 @@
+from datetime import date
 import strawberry
 from typing import List, Optional
 
@@ -9,13 +10,22 @@ class Fields:
     date: Optional[str] = None
 
 @strawberry.input
-class OSInput:
+class StringAtributes:
     _eq: Optional[str] = None
+    _not: Optional[str] = None
 
 @strawberry.input
-class Where:
-    os: Optional[OSInput] = None
-    date: Optional[bool] = None
+class IntAttributes:
+    _eq: Optional[int] = None
+
+@strawberry.input
+class DateAttributes:
+    _eq: Optional[str] = None]
+
+@strawberry.input
+class WhereInput:
+    os: Optional[StringAtributes] = None
+    date: Optional[DateAttributes] = None
 
 @strawberry.type
 class Group:
@@ -37,7 +47,7 @@ class Data:
 class Query:
     @strawberry.field
     def get_data(self, 
-                 where: Optional[Where] = None, 
+                 where: Optional[WhereInput] = None, 
                  order: Optional[OrderInput] = None) -> Data:
         print(where)
         print(order)
