@@ -20,7 +20,7 @@ class IntAttributes:
 
 @strawberry.input
 class DateAttributes:
-    _eq: Optional[str] = None]
+    _eq: Optional[str] = None
 
 @strawberry.input
 class WhereInput:
