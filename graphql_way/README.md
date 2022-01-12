@@ -4,6 +4,8 @@ As I know, GraphQL is made for situations like this.
 
 This part is TBD for the moment.
 
+[testing](http://localhost:5000/graphql)
+
 ## Stack
 
 * fastapi
